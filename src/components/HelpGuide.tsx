@@ -423,7 +423,7 @@ export const HelpGuide: React.FC = () => {
             
             <div className="border-l-4 border-indigo-500 pl-4">
               <h4 className="font-medium text-gray-900 mb-2">Luồng phê duyệt hoạt động như thế nào?</h4>
-              <p className="text-gray-600">Hợp đồng sẽ đi qua các bước: Quản lý phòng ban → Pháp chế → Tài chính → CEO (nếu >500M VND). Mỗi bước có thể phê duyệt hoặc từ chối.</p>
+              <p className="text-gray-600">Hợp đồng sẽ đi qua các bước: Quản lý phòng ban → Pháp chế → Tài chính → CEO (nếu lơn hơn 500M VND). Mỗi bước có thể phê duyệt hoặc từ chối.</p>
             </div>
             
             <div className="border-l-4 border-green-500 pl-4">
