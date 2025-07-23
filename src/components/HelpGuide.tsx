@@ -146,16 +146,30 @@ export const HelpGuide: React.FC = () => {
       ]
     },
     {
+      id: 'manual-creation',
+      name: 'Tạo hợp đồng thủ công',
+      icon: <FileText className="w-6 h-6 text-green-500" />,
+      description: 'Tạo hợp đồng trực tiếp trong hệ thống',
+      steps: [
+        'Nhấp nút "Tạo thủ công" trên trang chính',
+        'Điền đầy đủ thông tin theo 9 mục chính',
+        'Thêm các bên tham gia và phụ lục',
+        'Thiết lập tags và mức độ ưu tiên',
+        'Lưu dưới dạng nháp hoặc gửi để phê duyệt'
+      ]
+    },
+    {
       id: 'approval',
       name: 'Luồng phê duyệt',
       icon: <CheckCircle className="w-6 h-6 text-green-500" />,
-      description: 'Quy trình phê duyệt nhiều bước',
+      description: 'Quy trình phê duyệt phân cấp nhiều bước',
       steps: [
         'Hợp đồng được gửi để phê duyệt',
-        'Người duyệt nhận thông báo',
-        'Xem xét chi tiết hợp đồng và thông tin trích xuất',
-        'Thêm nhận xét và quyết định phê duyệt/từ chối',
-        'Chuyển sang bước tiếp theo hoặc hoàn thành'
+        'Bước 1: Quản lý phòng ban duyệt (≤100M VND)',
+        'Bước 2: Pháp chế kiểm tra tính hợp pháp',
+        'Bước 3: Tài chính đánh giá khả thi tài chính',
+        'Bước 4: CEO duyệt cuối (>500M VND)',
+        'Hoàn thành luồng phê duyệt'
       ]
     },
     {
@@ -195,9 +209,28 @@ export const HelpGuide: React.FC = () => {
         { step: 2, title: 'Xử lý OCR', description: 'Hệ thống trích xuất thông tin tự động', actor: 'System' },
         { step: 3, title: 'Kiểm tra', description: 'Nhân viên kiểm tra và chỉnh sửa thông tin', actor: 'Employee' },
         { step: 4, title: 'Gửi duyệt', description: 'Gửi hợp đồng vào luồng phê duyệt', actor: 'Employee' },
-        { step: 5, title: 'Phê duyệt', description: 'Manager/Legal xem xét và phê duyệt', actor: 'Manager/Legal' },
-        { step: 6, title: 'Ký điện tử', description: 'Thiết lập và thực hiện ký điện tử', actor: 'All parties' },
-        { step: 7, title: 'Lưu trữ', description: 'Lưu trữ hợp đồng đã hoàn thành', actor: 'System' }
+        { step: 5, title: 'Duyệt cấp 1', description: 'Quản lý phòng ban phê duyệt', actor: 'Manager' },
+        { step: 6, title: 'Duyệt pháp lý', description: 'Pháp chế kiểm tra và phê duyệt', actor: 'Legal' },
+        { step: 7, title: 'Duyệt tài chính', description: 'Tài chính đánh giá và phê duyệt', actor: 'Finance' },
+        { step: 8, title: 'Duyệt cuối', description: 'CEO phê duyệt cuối (nếu cần)', actor: 'CEO' },
+        { step: 9, title: 'Ký điện tử', description: 'Thiết lập và thực hiện ký điện tử', actor: 'All parties' },
+        { step: 10, title: 'Lưu trữ', description: 'Lưu trữ hợp đồng đã hoàn thành', actor: 'System' }
+      ]
+    },
+    {
+      id: 'manual-contract',
+      name: 'Quy trình tạo hợp đồng thủ công',
+      steps: [
+        { step: 1, title: 'Khởi tạo', description: 'Nhấp "Tạo thủ công" và mở form', actor: 'User' },
+        { step: 2, title: 'Thông tin chung', description: 'Điền tên, số hợp đồng, ngày ký, hiệu lực', actor: 'User' },
+        { step: 3, title: 'Các bên', description: 'Thêm thông tin các bên tham gia', actor: 'User' },
+        { step: 4, title: 'Mục đích', description: 'Mô tả loại hợp đồng và mục đích', actor: 'User' },
+        { step: 5, title: 'Tài chính', description: 'Nhập giá trị, phương thức thanh toán', actor: 'User' },
+        { step: 6, title: 'Thời gian', description: 'Thiết lập thời hạn và tiến độ', actor: 'User' },
+        { step: 7, title: 'Điều khoản', description: 'Bảo hành, phạt vi phạm, tranh chấp', actor: 'User' },
+        { step: 8, title: 'Phụ lục', description: 'Danh sách tài liệu đính kèm', actor: 'User' },
+        { step: 9, title: 'Tóm tắt', description: 'Mô tả tổng quan và ghi chú', actor: 'User' },
+        { step: 10, title: 'Lưu', description: 'Lưu nháp hoặc gửi phê duyệt', actor: 'User' }
       ]
     }
   ];
@@ -384,6 +417,16 @@ export const HelpGuide: React.FC = () => {
             </div>
             
             <div className="border-l-4 border-green-500 pl-4">
+              <h4 className="font-medium text-gray-900 mb-2">Làm sao để tạo hợp đồng thủ công?</h4>
+              <p className="text-gray-600">Nhấp nút "Tạo thủ công" trên trang chính, điền đầy đủ 9 mục thông tin theo template chuẩn, sau đó lưu nháp hoặc gửi phê duyệt.</p>
+            </div>
+            
+            <div className="border-l-4 border-indigo-500 pl-4">
+              <h4 className="font-medium text-gray-900 mb-2">Luồng phê duyệt hoạt động như thế nào?</h4>
+              <p className="text-gray-600">Hợp đồng sẽ đi qua các bước: Quản lý phòng ban → Pháp chế → Tài chính → CEO (nếu >500M VND). Mỗi bước có thể phê duyệt hoặc từ chối.</p>
+            </div>
+            
+            <div className="border-l-4 border-green-500 pl-4">
               <h4 className="font-medium text-gray-900 mb-2">Làm sao để thiết lập chữ ký điện tử?</h4>
               <p className="text-gray-600">Sau khi hợp đồng được phê duyệt, vào chi tiết hợp đồng, chọn tab "Chữ ký điện tử", thêm người ký và thiết lập thứ tự ký.</p>
             </div>
@@ -396,6 +439,11 @@ export const HelpGuide: React.FC = () => {
             <div className="border-l-4 border-red-500 pl-4">
               <h4 className="font-medium text-gray-900 mb-2">Làm sao để nhận thông báo khi hợp đồng sắp hết hạn?</h4>
               <p className="text-gray-600">Trong chi tiết hợp đồng, vào tab "Nhắc nhở" để thiết lập các thông báo tự động cho hết hạn, gia hạn hoặc xem xét.</p>
+            </div>
+            
+            <div className="border-l-4 border-amber-500 pl-4">
+              <h4 className="font-medium text-gray-900 mb-2">Thống kê có những loại báo cáo nào?</h4>
+              <p className="text-gray-600">Hệ thống cung cấp thống kê tổng quan, phân tích theo thời gian (ngày/tháng/năm), lý do từ chối, thời gian xử lý và xu hướng phê duyệt.</p>
             </div>
           </div>
         )}

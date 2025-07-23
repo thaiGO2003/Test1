@@ -31,6 +31,9 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
     // Luôn cần pháp chế cho hợp đồng quan trọng
     const needsLegal = value > 50000000 || contract.priority === 'high' || contract.priority === 'urgent';
     
+    // Luôn cần tài chính cho hợp đồng có giá trị
+    const needsFinance = value > 50000000 || contract.priority === 'high' || contract.priority === 'urgent';
+    
     const steps: ApprovalStep[] = [];
     let stepNumber = 1;
 
@@ -57,7 +60,18 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
       });
     }
 
-    // Bước 3: Giám đốc (nếu cần)
+    // Bước 3: Tài chính (nếu cần)
+    if (needsFinance) {
+      steps.push({
+        id: `step-${stepNumber}`,
+        stepNumber: stepNumber++,
+        approverRole: 'Phòng Tài chính',
+        requiredHierarchyLevel: 2,
+        status: 'pending'
+      });
+    }
+
+    // Bước 4: Giám đốc (nếu cần)
     if (requiredLevels.some(l => l.level >= 3)) {
       steps.push({
         id: `step-${stepNumber}`,
@@ -69,7 +83,7 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
       });
     }
 
-    // Bước 4: Tổng giám đốc (nếu cần)
+    // Bước 5: Tổng giám đốc (nếu cần)
     if (requiredLevels.some(l => l.level >= 4)) {
       steps.push({
         id: `step-${stepNumber}`,

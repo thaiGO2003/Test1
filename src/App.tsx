@@ -1,39 +1,53 @@
-import React, { useState } from 'react';
-import { FileText, Upload, CheckCircle, XCircle, Clock, Eye, User, Calendar, Search, Filter, Tag, Bell, MessageCircle, GitBranch, BarChart3, Download, LogOut, Users, Edit3, UserCheck, Plus } from 'lucide-react';
-import { Contract, ContractVersion, ContractComment, ContractTag, ApprovalStep, ContractReminder, ESignatureRequest, DashboardStats } from './types/contract';
-import { User as UserType, AuthState, LoginCredentials, RegisterData } from './types/user';
+import React, { useState, useEffect } from 'react';
+import { FileText, Upload, BarChart3, Users, Settings, HelpCircle, LogOut, Menu, X, Bell, Search, Plus } from 'lucide-react';
+import { Contract, ContractTag, DashboardStats, ContractComment, ContractReminder, ESignatureRequest } from './types/contract';
+import { User, AuthState, LoginCredentials, RegisterData } from './types/user';
+import { AuthModal } from './components/AuthModal';
+import { ContractEditor } from './components/ContractEditor';
 import { VersionHistory } from './components/VersionHistory';
 import { VersionComparison } from './components/VersionComparison';
-import { ESignaturePanel } from './components/ESignaturePanel';
-import { ContractReminders } from './components/ContractReminders';
-import { AdvancedDashboard } from './components/AdvancedDashboard';
-import { ContractComments } from './components/ContractComments';
-import { MultiStepApproval } from './components/MultiStepApproval';
-import { AuthModal } from './components/AuthModal';
-import { UserManagement } from './components/UserManagement';
-import { ContractEditor } from './components/ContractEditor';
-import { UserApprovalPanel } from './components/UserApprovalPanel';
 import { AdvancedVersionHistory } from './components/AdvancedVersionHistory';
+import { ContractComments } from './components/ContractComments';
+import { ContractReminders } from './components/ContractReminders';
+import { ESignaturePanel } from './components/ESignaturePanel';
+import { MultiStepApproval } from './components/MultiStepApproval';
 import { HierarchyApprovalFlow } from './components/HierarchyApprovalFlow';
-import { HelpCircle } from 'lucide-react';
+import { AdvancedDashboard } from './components/AdvancedDashboard';
+import { DetailedAnalytics } from './components/DetailedAnalytics';
+import { TimeBasedAnalytics } from './components/TimeBasedAnalytics';
+import { UserManagement } from './components/UserManagement';
+import { UserApprovalPanel } from './components/UserApprovalPanel';
 import { HelpGuide } from './components/HelpGuide';
 import { ManualContractCreator } from './components/ManualContractCreator';
 
-
 function App() {
-  // Authentication state
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
     token: null
   });
-  const [showAuthModal, setShowAuthModal] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('contracts');
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [showContractEditor, setShowContractEditor] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showVersionComparison, setShowVersionComparison] = useState(false);
+  const [comparisonVersions, setComparisonVersions] = useState<{ v1: any; v2: any } | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showManualCreator, setShowManualCreator] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [showDetailedAnalytics, setShowDetailedAnalytics] = useState(false);
 
-  // Users data
-  const [users, setUsers] = useState<UserType[]>([
+  // Mock data
+  const mockUsers: User[] = [
     {
       id: '1',
-      email: 'a',
+      email: 'admin@company.com',
       name: 'Quản trị viên',
       role: 'admin',
       department: 'IT',
@@ -41,7 +55,7 @@ function App() {
       isActive: true,
       isApproved: true,
       hierarchyLevel: 5,
-      createdAt: '2024-01-01',
+      createdAt: '2024-01-01T00:00:00Z',
       permissions: {
         canUpload: true,
         canApprove: true,
@@ -55,15 +69,15 @@ function App() {
     {
       id: '2',
       email: 'manager@company.com',
-      name: 'Trưởng phòng',
+      name: 'Nguyễn Văn Manager',
       role: 'manager',
-      department: 'HR',
-      position: 'HR Manager',
+      department: 'Operations',
+      position: 'Operations Manager',
       isActive: true,
       isApproved: true,
       hierarchyLevel: 2,
       maxContractValue: 100000000,
-      createdAt: '2024-01-01',
+      createdAt: '2024-01-01T00:00:00Z',
       permissions: {
         canUpload: true,
         canApprove: true,
@@ -76,36 +90,37 @@ function App() {
     },
     {
       id: '3',
-      email: 'employee@company.com',
-      name: 'Nhân viên',
-      role: 'employee',
-      department: 'Operations',
-      position: 'Staff',
+      email: 'legal@company.com',
+      name: 'Trần Thị Legal',
+      role: 'legal',
+      department: 'Legal',
+      position: 'Legal Specialist',
       isActive: true,
       isApproved: true,
-      hierarchyLevel: 1,
-      createdAt: '2024-01-01',
+      hierarchyLevel: 2,
+      createdAt: '2024-01-01T00:00:00Z',
       permissions: {
         canUpload: true,
-        canApprove: false,
+        canApprove: true,
         canManageUsers: false,
-        canViewAnalytics: false,
-        canSign: false,
+        canViewAnalytics: true,
+        canSign: true,
         canApproveUsers: false,
-        canCreateManual: false
+        canCreateManual: true
       }
     },
     {
       id: '4',
-      email: 'legal@company.com',
-      name: 'Pháp chế',
-      role: 'legal',
-      department: 'Legal',
-      position: 'Legal Counsel',
+      email: 'finance@company.com',
+      name: 'Lê Văn Finance',
+      role: 'finance',
+      department: 'Finance',
+      position: 'Finance Manager',
       isActive: true,
       isApproved: true,
       hierarchyLevel: 2,
-      createdAt: '2024-01-01',
+      maxContractValue: 500000000,
+      createdAt: '2024-01-01T00:00:00Z',
       permissions: {
         canUpload: true,
         canApprove: true,
@@ -118,244 +133,122 @@ function App() {
     },
     {
       id: '5',
-      email: 'director@company.com',
-      name: 'Giám đốc',
-      role: 'director',
-      department: 'Management',
-      position: 'Director',
+      email: 'employee@company.com',
+      name: 'Phạm Thị Employee',
+      role: 'employee',
+      department: 'Sales',
+      position: 'Sales Executive',
       isActive: true,
       isApproved: true,
-      hierarchyLevel: 3,
-      maxContractValue: 500000000,
-      createdAt: '2024-01-01',
+      hierarchyLevel: 1,
+      createdAt: '2024-01-01T00:00:00Z',
       permissions: {
         canUpload: true,
-        canApprove: true,
-        canManageUsers: true,
-        canViewAnalytics: true,
-        canSign: true,
-        canApproveUsers: true,
-        canCreateManual: true
+        canApprove: false,
+        canManageUsers: false,
+        canViewAnalytics: false,
+        canSign: false,
+        canApproveUsers: false,
+        canCreateManual: false
       }
     }
-  ]);
+  ];
 
-  const [contracts, setContracts] = useState<Contract[]>([
+  const mockTags: ContractTag[] = [
+    { id: '1', name: 'Cung cấp dịch vụ', color: 'blue', category: 'type' },
+    { id: '2', name: 'Mua bán hàng hóa', color: 'green', category: 'type' },
+    { id: '3', name: 'Thuê mướn', color: 'purple', category: 'type' },
+    { id: '4', name: 'Khẩn cấp', color: 'red', category: 'priority' },
+    { id: '5', name: 'Quan trọng', color: 'indigo', category: 'priority' },
+    { id: '6', name: 'Thường xuyên', color: 'gray', category: 'frequency' }
+  ];
+
+  const mockContracts: Contract[] = [
     {
       id: '1',
-      title: 'Hợp đồng mua bán thiết bị văn phòng',
-      description: 'Hợp đồng cung cấp thiết bị văn phòng cho chi nhánh Hà Nội',
+      title: 'Hợp đồng cung cấp phần mềm quản lý',
+      description: 'Hợp đồng cung cấp và triển khai phần mềm quản lý cho công ty',
       status: 'pending',
-      uploadDate: '2024-01-15',
-      expiryDate: '2024-07-15',
-      priority: 'medium',
-      rejectionReason: undefined,
-      createdBy: 'user1',
-      tags: [
-        { id: '1', name: 'Mua sắm', color: 'blue', category: 'Loại' },
-        { id: '2', name: 'Thiết bị', color: 'green', category: 'Danh mục' }
-      ],
+      uploadDate: '2024-01-15T10:00:00Z',
+      priority: 'high',
+      contractValue: 150000000,
+      currency: 'VND',
+      tags: [mockTags[0], mockTags[4]],
       versions: [
         {
           id: 'v1',
           version: 1,
-          title: 'Phiên bản ban đầu',
-          content: 'Nội dung hợp đồng mua bán thiết bị văn phòng...',
-          changes: 'Tạo mới',
+          title: 'Phiên bản gốc',
+          content: 'Nội dung hợp đồng cung cấp phần mềm quản lý...',
+          changes: 'Tạo mới hợp đồng',
           changeType: 'created',
-          changedFields: [],
-          createdByRole: 'employee',
-          fileSize: 1024000,
-          checksum: 'abc123def456',
-          createdAt: '2024-01-15T09:00:00',
-          createdBy: 'Nguyễn Văn A'
+          createdAt: '2024-01-15T10:00:00Z',
+          createdBy: 'Phạm Thị Employee',
+          createdByRole: 'employee'
         }
       ],
       currentVersion: 1,
-      approvalSteps: [
-        {
-          id: 'step1',
-          stepNumber: 1,
-          approverRole: 'Trưởng phòng Nhân sự',
-          requiredHierarchyLevel: 2,
-          contractValueThreshold: 100000000,
-          status: 'approved',
-          approvedAt: '2024-01-16',
-          approverName: 'Trần Thị B',
-          approverId: '2',
-          comments: 'Hợp đồng phù hợp với quy định'
-        },
-        {
-          id: 'step2',
-          stepNumber: 2,
-          approverRole: 'Phòng Pháp chế',
-          requiredHierarchyLevel: 2,
-          status: 'pending'
-        }
-      ],
-      currentStep: 1,
-      reminders: [
-        {
-          id: 'r1',
-          contractId: '1',
-          type: 'expiry',
-          reminderDate: '2024-07-01T09:00:00',
-          message: 'Hợp đồng sắp hết hạn, cần xem xét gia hạn',
-          isActive: true
-        }
-      ],
-      extractedInfo: {
-        contractType: 'Mua bán',
-        parties: ['Công ty ABC', 'Công ty XYZ'],
-        value: '500.000.000 VND',
-        numericValue: 500000000,
-        duration: '6 tháng',
-        summary: 'Hợp đồng cung cấp thiết bị văn phòng bao gồm máy tính, máy in, bàn ghế làm việc.',
-        fullText: 'Nội dung đầy đủ của hợp đồng để tìm kiếm toàn văn...',
-        keyTerms: ['thiết bị văn phòng', 'bảo hành', 'thanh toán'],
-        riskLevel: 'medium'
-      }
-    },
-    {
-      id: '2',
-      title: 'Hợp đồng dịch vụ bảo trì',
-      description: 'Hợp đồng bảo trì hệ thống IT',
-      status: 'approved',
-      uploadDate: '2024-01-10',
-      reviewDate: '2024-01-12',
-      expiryDate: '2025-01-10',
-      priority: 'low',
-      rejectionReason: undefined,
-      createdBy: 'user2',
-      reviewer: 'Nguyễn Văn A',
-      tags: [
-        { id: '3', name: 'Dịch vụ', color: 'purple', category: 'Loại' },
-        { id: '4', name: 'IT', color: 'indigo', category: 'Danh mục' }
-      ],
-      versions: [
-        {
-          id: 'v2',
-          version: 1,
-          title: 'Phiên bản ban đầu',
-          content: 'Nội dung hợp đồng dịch vụ bảo trì...',
-          changes: 'Tạo mới',
-          changeType: 'created',
-          changedFields: [],
-          createdByRole: 'manager',
-          fileSize: 2048000,
-          checksum: 'def456ghi789',
-          createdAt: '2024-01-10T10:00:00',
-          createdBy: 'Lê Văn C'
-        }
-      ],
-      currentVersion: 1,
-      approvalSteps: [
-        {
-          id: 'step3',
-          stepNumber: 1,
-          approverRole: 'Trưởng phòng IT',
-          requiredHierarchyLevel: 2,
-          status: 'approved',
-          approvedAt: '2024-01-12',
-          approverName: 'Nguyễn Văn A',
-          approverId: '1',
-          comments: 'Hợp đồng đã được duyệt'
-        }
-      ],
+      approvalSteps: [],
       currentStep: 0,
       reminders: [],
       extractedInfo: {
-        contractType: 'Dịch vụ',
-        parties: ['Công ty DEF', 'Công ty GHI'],
-        value: '120.000.000 VND',
-        numericValue: 120000000,
+        contractType: 'Hợp đồng cung cấp dịch vụ phần mềm',
+        parties: ['Công ty ABC', 'Công ty XYZ Technology'],
+        value: '150,000,000 VND',
+        numericValue: 150000000,
         duration: '12 tháng',
-        summary: 'Hợp đồng bảo trì hệ thống máy chủ và phần mềm quản lý.',
-        fullText: 'Nội dung đầy đủ của hợp đồng bảo trì hệ thống IT...',
-        keyTerms: ['bảo trì', 'hệ thống IT', 'phần mềm'],
-        riskLevel: 'low'
-      }
+        summary: 'Hợp đồng cung cấp và triển khai hệ thống phần mềm quản lý tổng thể cho công ty ABC',
+        fullText: 'Nội dung đầy đủ của hợp đồng...',
+        contractNumber: 'HD-2024-001',
+        signDate: '2024-01-15',
+        effectiveDate: '2024-02-01',
+        expirationDate: '2025-01-31',
+        purpose: 'Cung cấp và triển khai phần mềm quản lý kho, bán hàng và tài chính',
+        paymentMethod: 'Chuyển khoản',
+        paymentSchedule: 'Thanh toán theo tiến độ: 30% ký hợp đồng, 50% nghiệm thu, 20% bảo hành',
+        warrantyInfo: 'Bảo hành 12 tháng kể từ ngày nghiệm thu',
+        penaltyClause: 'Phạt 0.1%/ngày chậm tiến độ, tối đa 10% giá trị hợp đồng',
+        disputeResolution: 'Trọng tài thương mại Việt Nam',
+        attachments: ['Bảng báo giá chi tiết', 'Sơ đồ kiến trúc hệ thống'],
+        currentStatus: 'Đang chờ phê duyệt',
+        paymentProgress: 0,
+        responsiblePerson: 'Phạm Thị Employee',
+        specialNotes: 'Yêu cầu triển khai trong Q1/2024'
+      },
+      createdBy: 'employee@company.com'
     }
-  ]);
+  ];
 
-  const [comments, setComments] = useState<ContractComment[]>([
-    {
-      id: 'c1',
-      contractId: '1',
-      userId: 'user1',
-      userName: 'Trần Thị B',
-      content: 'Cần xem xét lại điều khoản thanh toán',
-      highlightedText: 'thanh toán trong vòng 30 ngày',
-      createdAt: '2024-01-16T14:30:00',
-      isResolved: false
-    }
-  ]);
+  useEffect(() => {
+    setUsers(mockUsers);
+    setContracts(mockContracts);
+    // Auto login as admin for demo
+    setAuthState({
+      isAuthenticated: true,
+      user: mockUsers[0],
+      token: 'mock-token'
+    });
+  }, []);
 
-  const [availableTags] = useState<ContractTag[]>([
-    { id: '1', name: 'Mua sắm', color: 'blue', category: 'Loại' },
-    { id: '2', name: 'Thiết bị', color: 'green', category: 'Danh mục' },
-    { id: '3', name: 'Dịch vụ', color: 'purple', category: 'Loại' },
-    { id: '4', name: 'IT', color: 'indigo', category: 'Danh mục' },
-    { id: '5', name: 'Nội bộ', color: 'gray', category: 'Phạm vi' },
-    { id: '6', name: 'Đối tác A', color: 'red', category: 'Đối tác' }
-  ]);
-
-  const [dashboardStats] = useState<DashboardStats>({
-    totalContracts: contracts.length,
-    pendingApproval: contracts.filter(c => c.status === 'pending').length,
-    approved: contracts.filter(c => c.status === 'approved').length,
-    rejected: contracts.filter(c => c.status === 'rejected').length,
-    expiringSoon: 3,
-    averageProcessingTime: 5,
-    approvalRate: 85,
-    monthlyUploads: [12, 15, 8, 22, 18, 25, 20, 16, 19, 23, 21, 18],
-    rejectionReasons: [
-      { reason: 'Thiếu thông tin', count: 8 },
-      { reason: 'Không đúng quy định', count: 5 },
-      { reason: 'Cần bổ sung tài liệu', count: 3 },
-      { reason: 'Giá trị vượt thẩm quyền', count: 2 }
-    ]
-  });
-
-  const [activeView, setActiveView] = useState<'dashboard' | 'upload' | 'contracts' | 'approved' | 'analytics' | 'users' | 'help' | 'user-approval'>('dashboard');
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [editingContract, setEditingContract] = useState<Contract | null>(null);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [showAdvancedVersionHistory, setShowAdvancedVersionHistory] = useState(false);
-  const [showVersionComparison, setShowVersionComparison] = useState<{ v1: ContractVersion; v2: ContractVersion } | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterTags, setFilterTags] = useState<string[]>([]);
-  const [fullTextSearch, setFullTextSearch] = useState('');
-  const [showManualCreator, setShowManualCreator] = useState(false);
-
-  // Authentication functions
   const handleLogin = (credentials: LoginCredentials) => {
-    const user = users.find(u => u.email === credentials.email && u.isActive && u.isApproved);
+    const user = mockUsers.find(u => u.email === credentials.email);
     if (user) {
       setAuthState({
         isAuthenticated: true,
         user,
-        token: 'mock-jwt-token'
+        token: 'mock-token'
       });
       setShowAuthModal(false);
-    } else {
-      const user = users.find(u => u.email === credentials.email);
-      const message = user && !user.isApproved ? 'Tài khoản chưa được phê duyệt!' : 'Email hoặc mật khẩu không đúng!';
-      alert(message);
     }
   };
 
   const handleRegister = (data: RegisterData) => {
-    const newUser: UserType = {
+    const newUser: User = {
       id: Date.now().toString(),
-      email: data.email,
-      name: data.name,
+      ...data,
       role: 'employee',
-      department: data.department,
-      position: data.position,
-      isActive: true,
-      isApproved: false, // Cần phê duyệt
+      isActive: false,
+      isApproved: false,
       hierarchyLevel: 1,
       createdAt: new Date().toISOString(),
       permissions: {
@@ -369,7 +262,7 @@ function App() {
       }
     };
     setUsers([...users, newUser]);
-    alert('Đăng ký thành công! Tài khoản của bạn đang chờ phê duyệt.');
+    setShowAuthModal(false);
   };
 
   const handleLogout = () => {
@@ -378,430 +271,221 @@ function App() {
       user: null,
       token: null
     });
-    setShowAuthModal(true);
-    setActiveView('dashboard');
+    setActiveTab('contracts');
   };
 
-  // User management functions
-  const handleAddUser = (userData: Omit<UserType, 'id' | 'createdAt' | 'isActive'>) => {
-    const newUser: UserType = {
+  const handleContractSave = (contractId: string, updates: Partial<Contract>) => {
+    setContracts(contracts.map(c => 
+      c.id === contractId ? { ...c, ...updates } : c
+    ));
+    setShowContractEditor(false);
+  };
+
+  const handleVersionSelect = (version: any) => {
+    console.log('Selected version:', version);
+  };
+
+  const handleCompareVersions = (v1: any, v2: any) => {
+    setComparisonVersions({ v1, v2 });
+    setShowVersionComparison(true);
+  };
+
+  const handleAddComment = (contractId: string, content: string, highlightedText?: string) => {
+    console.log('Add comment:', { contractId, content, highlightedText });
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    console.log('Delete comment:', commentId);
+  };
+
+  const handleResolveComment = (commentId: string) => {
+    console.log('Resolve comment:', commentId);
+  };
+
+  const handleAddReminder = (contractId: string, reminder: Omit<ContractReminder, 'id'>) => {
+    console.log('Add reminder:', { contractId, reminder });
+  };
+
+  const handleDeleteReminder = (reminderId: string) => {
+    console.log('Delete reminder:', reminderId);
+  };
+
+  const handleSendForSignature = (contractId: string, signers: any[], provider: string) => {
+    console.log('Send for signature:', { contractId, signers, provider });
+  };
+
+  const handleApproveStep = (stepId: string, comments?: string) => {
+    console.log('Approve step:', { stepId, comments });
+  };
+
+  const handleRejectStep = (stepId: string, reason: string) => {
+    console.log('Reject step:', { stepId, reason });
+  };
+
+  const handleUpdateApprovalFlow = (contractId: string, steps: any[]) => {
+    console.log('Update approval flow:', { contractId, steps });
+  };
+
+  const handleAddUser = (userData: Omit<User, 'id' | 'createdAt' | 'isActive'>) => {
+    const newUser: User = {
       ...userData,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      isActive: true
+      isActive: true,
+      isApproved: true,
+      hierarchyLevel: userData.role === 'admin' ? 5 : userData.role === 'manager' ? 2 : 1
     };
     setUsers([...users, newUser]);
   };
 
-  const handleUpdateUser = (userId: string, userData: Partial<UserType>) => {
+  const handleUpdateUser = (userId: string, userData: Partial<User>) => {
     setUsers(users.map(u => u.id === userId ? { ...u, ...userData } : u));
   };
 
   const handleDeleteUser = (userId: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      setUsers(users.filter(u => u.id !== userId));
-    }
+    setUsers(users.filter(u => u.id !== userId));
   };
 
-  // User approval functions
   const handleApproveUser = (userId: string) => {
     setUsers(users.map(u => 
-      u.id === userId ? { 
-        ...u, 
-        isApproved: true,
-        approvedBy: authState.user?.name,
-        approvedAt: new Date().toISOString()
-      } : u
+      u.id === userId ? { ...u, isApproved: true, approvedBy: authState.user?.name, approvedAt: new Date().toISOString() } : u
     ));
   };
 
   const handleRejectUser = (userId: string, reason: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn từ chối tài khoản này?\nLý do: ${reason}`)) {
-      setUsers(users.filter(u => u.id !== userId));
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-300';
-      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'approved': return 'bg-green-100 text-green-800 border-green-300';
-      case 'rejected': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'draft': return 'Nháp';
-      case 'pending': return 'Chờ duyệt';
-      case 'approved': return 'Đã duyệt';
-      case 'rejected': return 'Từ chối';
-      default: return status;
-    }
-  };
-
-  const getStatusCount = (status: string) => {
-    return contracts.filter(c => c.status === status).length;
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Simulate OCR processing
-      const newContract: Contract = {
-        id: Date.now().toString(),
-        title: file.name.replace(/\.[^/.]+$/, ""),
-        description: 'Hợp đồng được tải lên và xử lý tự động',
-        status: 'draft',
-        uploadDate: new Date().toISOString().split('T')[0],
-        priority: 'medium',
-        createdBy: authState.user?.id || 'current-user',
-        file: file,
-        tags: [],
-        versions: [
-          {
-            id: 'v1',
-            version: 1,
-            title: 'Phiên bản ban đầu',
-            content: 'Nội dung hợp đồng đang được xử lý...',
-            changes: 'Tạo mới',
-            changeType: 'created',
-            changedFields: [],
-            createdByRole: authState.user?.role || 'employee',
-            fileSize: file.size,
-            checksum: Math.random().toString(36).substring(2, 15),
-            createdAt: new Date().toISOString(),
-            createdBy: authState.user?.name || 'Current User'
-          }
-        ],
-        currentVersion: 1,
-        approvalSteps: [],
-        currentStep: 0,
-        reminders: [],
-        extractedInfo: {
-          contractType: 'Được trích xuất tự động',
-          parties: ['Đang xử lý OCR...'],
-          value: 'Đang phân tích...',
-          numericValue: 0,
-          duration: 'Đang phân tích...',
-          summary: 'Hệ thống đang xử lý OCR để trích xuất thông tin từ hợp đồng. Vui lòng kiểm tra và chỉnh sửa thông tin nếu cần.',
-          fullText: 'Nội dung đầy đủ đang được xử lý...',
-          keyTerms: [],
-          riskLevel: 'low'
-        }
-      };
-      setContracts([...contracts, newContract]);
-      setActiveView('contracts');
-    }
+    setUsers(users.filter(u => u.id !== userId));
   };
 
   const handleManualContractSave = (contractData: Partial<Contract>) => {
     const newContract: Contract = {
       id: Date.now().toString(),
-      title: contractData.title || '',
-      description: contractData.description || '',
+      ...contractData,
       status: 'draft',
       uploadDate: new Date().toISOString(),
-      tags: contractData.tags || [],
-      versions: [{
-        id: '1',
-        version: 1,
-        title: contractData.title || '',
-        content: contractData.extractedInfo?.fullText || '',
-        changes: 'Tạo hợp đồng thủ công',
-        changeType: 'created',
-        createdAt: new Date().toISOString(),
-        createdBy: authState.user?.name || '',
-        createdByRole: authState.user?.role || ''
-      }],
+      versions: [
+        {
+          id: 'v1',
+          version: 1,
+          title: 'Phiên bản gốc (tạo thủ công)',
+          content: contractData.extractedInfo?.fullText || '',
+          changes: 'Tạo hợp đồng thủ công',
+          changeType: 'created',
+          createdAt: new Date().toISOString(),
+          createdBy: authState.user?.name || 'Unknown',
+          createdByRole: authState.user?.role || 'unknown'
+        }
+      ],
       currentVersion: 1,
       approvalSteps: [],
       currentStep: 0,
-      priority: contractData.priority || 'medium',
-      contractValue: contractData.contractValue,
-      currency: contractData.currency || 'VND',
       reminders: [],
-      extractedInfo: contractData.extractedInfo,
-      createdBy: authState.user?.name || '',
+      createdBy: authState.user?.email || 'unknown',
       createdManually: true
+    } as Contract;
+
+    setContracts([newContract, ...contracts]);
+  };
+
+  const getDashboardStats = (): DashboardStats => {
+    return {
+      totalContracts: contracts.length,
+      pendingApproval: contracts.filter(c => c.status === 'pending').length,
+      approved: contracts.filter(c => c.status === 'approved').length,
+      rejected: contracts.filter(c => c.status === 'rejected').length,
+      expiringSoon: contracts.filter(c => {
+        if (!c.expiryDate) return false;
+        const expiryDate = new Date(c.expiryDate);
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+        return expiryDate <= thirtyDaysFromNow;
+      }).length,
+      averageProcessingTime: 3.5,
+      approvalRate: 85,
+      monthlyUploads: [12, 19, 15, 22, 18, 25, 20, 16, 23, 28, 21, 19],
+      rejectionReasons: [
+        { reason: 'Thiếu thông tin pháp lý', count: 5 },
+        { reason: 'Giá trị không phù hợp', count: 3 },
+        { reason: 'Điều khoản chưa rõ ràng', count: 2 }
+      ]
     };
-
-    setContracts([...contracts, newContract]);
-    setShowManualCreator(false);
-  };
-
-  const handleSubmitForApproval = (contractId: string) => {
-    setContracts(contracts.map(c => 
-      c.id === contractId ? { ...c, status: 'pending' } : c
-    ));
-  };
-
-  const handleApproveContract = (contractId: string, comments?: string) => {
-    setContracts(contracts.map(c => 
-      c.id === contractId ? { 
-        ...c, 
-        status: 'approved', 
-        reviewDate: new Date().toISOString().split('T')[0],
-        reviewer: authState.user?.name || 'Admin User',
-        comments: comments || 'Hợp đồng đã được phê duyệt'
-      } : c
-    ));
-    setSelectedContract(null);
-  };
-
-  const handleRejectContract = (contractId: string, reason: string) => {
-    setContracts(contracts.map(c => 
-      c.id === contractId ? { 
-        ...c, 
-        status: 'rejected', 
-        reviewDate: new Date().toISOString().split('T')[0],
-        reviewer: authState.user?.name || 'Admin User',
-        comments: reason
-      } : c
-    ));
-    setSelectedContract(null);
   };
 
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (fullTextSearch && contract.extractedInfo?.fullText.toLowerCase().includes(fullTextSearch.toLowerCase()));
-    const matchesFilter = filterStatus === 'all' || contract.status === filterStatus;
-    const matchesTags = filterTags.length === 0 || filterTags.some(tagId => 
-      contract.tags.some(tag => tag.id === tagId)
-    );
-    return matchesSearch && matchesFilter && matchesTags;
+                         contract.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || contract.status === filterStatus;
+    const matchesPriority = filterPriority === 'all' || contract.priority === filterPriority;
+    return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const handleAddVersion = (contractId: string, title: string, content: string, changes: string) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        const newVersion: ContractVersion = {
-          id: `v${c.versions.length + 1}`,
-          version: c.versions.length + 1,
-          title,
-          content,
-          changes,
-          changeType: 'edited',
-          changedFields: ['content', 'title'],
-          previousVersion: `v${c.versions.length}`,
-          createdByRole: authState.user?.role || 'employee',
-          fileSize: content.length,
-          checksum: Math.random().toString(36).substring(2, 15),
-          createdAt: new Date().toISOString(),
-          createdBy: authState.user?.name || 'Current User'
-        };
-        return {
-          ...c,
-          versions: [...c.versions, newVersion],
-          currentVersion: newVersion.version
-        };
-      }
-      return c;
-    }));
-  };
+  const pendingUsers = users.filter(u => !u.isApproved);
 
-  const handleAddComment = (contractId: string, content: string, highlightedText?: string) => {
-    const newComment: ContractComment = {
-      id: `c${comments.length + 1}`,
-      contractId,
-      userId: authState.user?.id || 'current-user',
-      userName: authState.user?.name || 'Current User',
-      content,
-      highlightedText,
-      createdAt: new Date().toISOString(),
-      isResolved: false
-    };
-    setComments([...comments, newComment]);
-  };
+  const menuItems = [
+    { id: 'contracts', label: 'Hợp đồng', icon: FileText },
+    { id: 'analytics', label: 'Thống kê', icon: BarChart3, requiresPermission: 'canViewAnalytics' },
+    { id: 'users', label: 'Quản lý người dùng', icon: Users, requiresPermission: 'canManageUsers' },
+    { id: 'help', label: 'Hướng dẫn', icon: HelpCircle }
+  ];
 
-  const handleDeleteComment = (commentId: string) => {
-    setComments(comments.filter(c => c.id !== commentId));
-  };
-
-  const handleResolveComment = (commentId: string) => {
-    setComments(comments.map(c => 
-      c.id === commentId ? { ...c, isResolved: true } : c
-    ));
-  };
-
-  const handleAddReminder = (contractId: string, reminder: Omit<ContractReminder, 'id'>) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        const newReminder: ContractReminder = {
-          ...reminder,
-          id: `r${c.reminders.length + 1}`
-        };
-        return {
-          ...c,
-          reminders: [...c.reminders, newReminder]
-        };
-      }
-      return c;
-    }));
-  };
-
-  const handleDeleteReminder = (contractId: string, reminderId: string) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        return {
-          ...c,
-          reminders: c.reminders.filter(r => r.id !== reminderId)
-        };
-      }
-      return c;
-    }));
-  };
-
-  const handleSendForSignature = (contractId: string, signers: Array<{ email: string; name: string; role: string }>, provider: string) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        const eSignature: ESignatureRequest = {
-          id: `es${Date.now()}`,
-          contractId,
-          signers: signers.map(s => ({ ...s, signed: false })),
-          provider: provider as any,
-          status: 'pending',
-          createdAt: new Date().toISOString()
-        };
-        return { ...c, eSignature };
-      }
-      return c;
-    }));
-  };
-
-  const handleApprovalStepAction = (contractId: string, stepId: string, action: 'approve' | 'reject', comments?: string) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        const updatedSteps = c.approvalSteps.map(step => {
-          if (step.id === stepId) {
-            return {
-              ...step,
-              status: action === 'approve' ? 'approved' : 'rejected',
-              approvedAt: new Date().toISOString().split('T')[0],
-              approverName: authState.user?.name || 'Current User',
-              approverId: authState.user?.id || 'current-user',
-              timeSpent: Math.floor(Math.random() * 120) + 30, // Random 30-150 minutes
-              comments
-            };
-          }
-          return step;
-        });
-        
-        const currentStepIndex = updatedSteps.findIndex(s => s.id === stepId);
-        const newCurrentStep = action === 'approve' ? currentStepIndex + 1 : currentStepIndex;
-        const allApproved = updatedSteps.every(s => s.status === 'approved');
-        const hasRejected = updatedSteps.some(s => s.status === 'rejected');
-        
-        return {
-          ...c,
-          approvalSteps: updatedSteps,
-          currentStep: newCurrentStep,
-          status: hasRejected ? 'rejected' : allApproved ? 'approved' : 'pending'
-        };
-      }
-      return c;
-    }));
-  };
-
-  const handleGenerateFinalPDF = (contractId: string) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        return {
-          ...c,
-          finalPdfUrl: `/contracts/${contractId}/final.pdf`
-        };
-      }
-      return c;
-    }));
-  };
-
-  const handleUpdateApprovalFlow = (contractId: string, steps: ApprovalStep[]) => {
-    setContracts(contracts.map(c => 
-      c.id === contractId ? { ...c, approvalSteps: steps, currentStep: 0 } : c
-    ));
-  };
-
-  const handleRestoreVersion = (contractId: string, versionId: string) => {
-    const contract = contracts.find(c => c.id === contractId);
-    const version = contract?.versions.find(v => v.id === versionId);
-    if (contract && version) {
-      // Logic to restore version would go here
-      console.log('Restoring version', versionId, 'for contract', contractId);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-amber-100 text-amber-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'signed': return 'bg-blue-100 text-blue-800';
+      case 'expired': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getTagColor = (color: string) => {
-    const colors = {
-      blue: 'bg-blue-100 text-blue-800 border-blue-200',
-      green: 'bg-green-100 text-green-800 border-green-200',
-      purple: 'bg-purple-100 text-purple-800 border-purple-200',
-      indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-      gray: 'bg-gray-100 text-gray-800 border-gray-200',
-      red: 'bg-red-100 text-red-800 border-red-200'
-    };
-    return colors[color as keyof typeof colors] || colors.gray;
-  };
-
-  const canEditContract = (contract: Contract): boolean => {
-    if (!authState.user) return false;
-    
-    // Admin có thể chỉnh sửa mọi hợp đồng
-    if (authState.user.role === 'admin') return true;
-    
-    // Nhân viên chỉ có thể chỉnh sửa hợp đồng nháp hoặc bị từ chối
-    return contract.status === 'draft' || contract.status === 'rejected';
-  };
-
-  const handleEditContract = (contract: Contract) => {
-    if (canEditContract(contract)) {
-      setEditingContract(contract);
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'approved': return 'Đã duyệt';
+      case 'pending': return 'Chờ duyệt';
+      case 'rejected': return 'Từ chối';
+      case 'draft': return 'Nháp';
+      case 'signed': return 'Đã ký';
+      case 'expired': return 'Hết hạn';
+      default: return status;
     }
   };
 
-  const handleSaveContract = (contractId: string, updates: Partial<Contract>) => {
-    setContracts(contracts.map(c => {
-      if (c.id === contractId) {
-        const updatedContract = { ...c, ...updates };
-        
-        // Tạo phiên bản mới nếu có thay đổi nội dung
-        if (updates.extractedInfo) {
-          const newVersion: ContractVersion = {
-            id: `v${c.versions.length + 1}`,
-            version: c.versions.length + 1,
-            title: `Chỉnh sửa lần ${c.versions.length}`,
-            content: updates.extractedInfo.fullText || c.extractedInfo?.fullText || '',
-            changes: 'Cập nhật thông tin hợp đồng',
-            createdAt: new Date().toISOString(),
-            createdBy: authState.user?.name || 'Current User'
-          };
-          
-          updatedContract.versions = [...c.versions, newVersion];
-          updatedContract.currentVersion = newVersion.version;
-        }
-        
-        return updatedContract;
-      }
-      return c;
-    }));
-    setEditingContract(null);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'bg-red-100 text-red-800';
+      case 'high': return 'bg-orange-100 text-orange-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const getPendingUsers = () => {
-    return users.filter(u => !u.isApproved && u.isActive);
+  const getPriorityText = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'Khẩn cấp';
+      case 'high': return 'Cao';
+      case 'medium': return 'Trung bình';
+      case 'low': return 'Thấp';
+      default: return priority;
+    }
   };
 
-  // Show auth modal if not authenticated
   if (!authState.isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <FileText className="w-12 h-12 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">ContractFlow</h1>
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <FileText className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">ContractFlow</h1>
+            <p className="text-gray-600">Hệ thống quản lý và phê duyệt hợp đồng</p>
           </div>
-          <p className="text-gray-600 mb-8">Hệ thống quản lý và phê duyệt hợp đồng</p>
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Đăng nhập / Đăng ký
+          </button>
         </div>
         <AuthModal
           isOpen={showAuthModal}
@@ -813,629 +497,492 @@ function App() {
     );
   }
 
-  const renderDashboard = () => (
-    <AdvancedDashboard 
-      stats={dashboardStats} 
-      contracts={contracts}
-      onBack={() => setActiveView('dashboard')}
-      onContractClick={(contract) => setSelectedContract(contract)}
-    />
-  );
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-  const renderUserApproval = () => (
-    <UserApprovalPanel
-      pendingUsers={getPendingUsers()}
-      currentUser={authState.user!}
-      onApproveUser={handleApproveUser}
-      onRejectUser={handleRejectUser}
-    />
-  );
-
-  const renderUpload = () => (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-        <div className="text-center">
-          <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tải lên hợp đồng</h2>
-          <p className="text-gray-600 mb-8">Chọn file PDF hoặc hình ảnh để tải lên. Hệ thống sẽ tự động xử lý OCR và trích xuất thông tin.</p>
-          
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-blue-400 transition-colors">
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="file-upload"
-            />
-            <label
-              htmlFor="file-upload"
-              className="cursor-pointer flex flex-col items-center space-y-4"
-            >
-              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Upload className="w-8 h-8 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-lg font-medium text-gray-900">Chọn file để tải lên</p>
-                <p className="text-sm text-gray-500">PDF, JPG, PNG lên đến 10MB</p>
-              </div>
-            </label>
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <FileText className="w-8 h-8 text-blue-600" />
+            <span className="text-xl font-bold text-gray-900">ContractFlow</span>
           </div>
-          
-          {authState.user?.permissions.canCreateManual && (
-            <div className="mt-6">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <nav className="mt-6">
+          {menuItems.map((item) => {
+            const hasPermission = !item.requiresPermission || 
+              (authState.user?.permissions as any)?.[item.requiresPermission];
+            
+            if (!hasPermission) return null;
+
+            return (
               <button
-                onClick={() => setShowManualCreator(true)}
-                className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mx-auto"
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setSidebarOpen(false);
+                  if (item.id === 'analytics') {
+                    setShowDetailedAnalytics(false);
+                  }
+                }}
+                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
+                  activeTab === item.id ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
+                }`}
               >
-                <Plus className="w-5 h-5" />
-                <span>Tạo hợp đồng thủ công</span>
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
               </button>
+            );
+          })}
+        </nav>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 font-medium">
+                {authState.user?.name.charAt(0).toUpperCase()}
+              </span>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderContracts = () => (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-        <h2 className="text-2xl font-semibold text-gray-900">Quản lý hợp đồng</h2>
-        <div className="flex flex-wrap gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm hợp đồng..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div>
+              <p className="font-medium text-gray-900">{authState.user?.name}</p>
+              <p className="text-sm text-gray-500">{authState.user?.position}</p>
+            </div>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm toàn văn..."
-              value={fullTextSearch}
-              onChange={(e) => setFullTextSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="draft">Nháp</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Từ chối</option>
-          </select>
-          <select
-            multiple
-            value={filterTags}
-            onChange={(e) => setFilterTags(Array.from(e.target.selectedOptions, option => option.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Tất cả tags</option>
-            {availableTags.map(tag => (
-              <option key={tag.id} value={tag.id}>{tag.name}</option>
-            ))}
-          </select>
+            <LogOut className="w-4 h-4" />
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hợp đồng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ngày tải lên
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Người duyệt
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredContracts.map((contract) => (
-                <tr key={contract.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{contract.title}</p>
-                      <p className="text-sm text-gray-500">{contract.description}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {contract.tags.map(tag => (
-                          <span
-                            key={tag.id}
-                            className={`px-2 py-1 text-xs font-medium rounded-full border ${getTagColor(tag.color)}`}
-                          >
+      {/* Main content */}
+      <div className="lg:ml-64">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden text-gray-400 hover:text-gray-600"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <h1 className="text-xl font-semibold text-gray-900">
+                {activeTab === 'contracts' && 'Quản lý hợp đồng'}
+                {activeTab === 'analytics' && 'Thống kê và báo cáo'}
+                {activeTab === 'users' && 'Quản lý người dùng'}
+                {activeTab === 'help' && 'Hướng dẫn sử dụng'}
+              </h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              {pendingUsers.length > 0 && authState.user?.permissions.canApproveUsers && (
+                <div className="relative">
+                  <Bell className="w-6 h-6 text-gray-400" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {pendingUsers.length}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="p-6">
+          {activeTab === 'contracts' && (
+            <div className="space-y-6">
+              {/* User Approval Panel */}
+              {pendingUsers.length > 0 && authState.user?.permissions.canApproveUsers && (
+                <UserApprovalPanel
+                  pendingUsers={pendingUsers}
+                  currentUser={authState.user}
+                  onApproveUser={handleApproveUser}
+                  onRejectUser={handleRejectUser}
+                />
+              )}
+
+              {/* Filters and Actions */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                <div className="flex flex-wrap gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm hợp đồng..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="draft">Nháp</option>
+                    <option value="pending">Chờ duyệt</option>
+                    <option value="approved">Đã duyệt</option>
+                    <option value="rejected">Từ chối</option>
+                    <option value="signed">Đã ký</option>
+                  </select>
+                  <select
+                    value={filterPriority}
+                    onChange={(e) => setFilterPriority(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">Tất cả mức độ</option>
+                    <option value="urgent">Khẩn cấp</option>
+                    <option value="high">Cao</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="low">Thấp</option>
+                  </select>
+                </div>
+                <div className="flex space-x-3">
+                  {authState.user?.permissions.canCreateManual && (
+                    <button
+                      onClick={() => setShowManualCreator(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tạo thủ công</span>
+                    </button>
+                  )}
+                  {authState.user?.permissions.canUpload && (
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>Tải lên hợp đồng</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Contracts Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredContracts.map((contract) => (
+                  <div
+                    key={contract.id}
+                    onClick={() => setSelectedContract(contract)}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900 line-clamp-2">{contract.title}</h3>
+                      <div className="flex flex-col space-y-1">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contract.status)}`}>
+                          {getStatusText(contract.status)}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(contract.priority)}`}>
+                          {getPriorityText(contract.priority)}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{contract.description}</p>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>Tải lên: {new Date(contract.uploadDate).toLocaleDateString('vi-VN')}</span>
+                      {contract.contractValue && (
+                        <span className="font-medium">
+                          {new Intl.NumberFormat('vi-VN').format(contract.contractValue)} {contract.currency}
+                        </span>
+                      )}
+                    </div>
+                    {contract.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {contract.tags.slice(0, 2).map(tag => (
+                          <span key={tag.id} className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
                             {tag.name}
                           </span>
                         ))}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(contract.status)}`}>
-                      {getStatusText(contract.status)}
-                    </span>
-                    {contract.reminders.some(r => new Date(r.reminderDate) <= new Date()) && (
-                      <div className="flex items-center space-x-1 mt-1 text-red-600">
-                        <Bell className="w-3 h-3" />
-                        <span className="text-xs">Có nhắc nhở</span>
+                        {contract.tags.length > 2 && (
+                          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                            +{contract.tags.length - 2}
+                          </span>
+                        )}
                       </div>
                     )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(contract.uploadDate).toLocaleDateString('vi-VN')}
-                    {contract.expiryDate && (
-                      <div className="text-xs text-gray-400 mt-1">
-                        Hết hạn: {new Date(contract.expiryDate).toLocaleDateString('vi-VN')}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {contract.reviewer || '-'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setSelectedContract(contract)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        Xem chi tiết
-                      </button>
-                      {canEditContract(contract) && (
-                        <button
-                          onClick={() => handleEditContract(contract)}
-                          className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-                        >
-                          Chỉnh sửa
-                        </button>
-                      )}
-                      {contract.status === 'draft' && (
-                        <button
-                          onClick={() => handleSubmitForApproval(contract.id)}
-                          className="text-green-600 hover:text-green-800 text-sm font-medium"
-                        >
-                          Gửi duyệt
-                        </button>
-                      )}
-                      {contract.status === 'approved' && contract.finalPdfUrl && (
-                        <a
-                          href={contract.finalPdfUrl}
-                          className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-                          download
-                        >
-                          Tải PDF
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredContracts.length === 0 && (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy hợp đồng</h3>
+                  <p className="text-gray-500">Thử thay đổi bộ lọc hoặc tải lên hợp đồng mới</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (
+            <div>
+              {showDetailedAnalytics ? (
+                <DetailedAnalytics
+                  stats={getDashboardStats()}
+                  contracts={contracts}
+                  onBack={() => setShowDetailedAnalytics(false)}
+                  onContractClick={setSelectedContract}
+                />
+              ) : (
+                <div className="space-y-6">
+                  <AdvancedDashboard
+                    stats={getDashboardStats()}
+                    onMetricClick={(metric) => setShowDetailedAnalytics(true)}
+                    onChartClick={(data, type) => setShowDetailedAnalytics(true)}
+                  />
+                  <TimeBasedAnalytics
+                    contracts={contracts}
+                    onContractClick={setSelectedContract}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'users' && authState.user?.permissions.canManageUsers && (
+            <UserManagement
+              users={users}
+              currentUser={authState.user}
+              onAddUser={handleAddUser}
+              onUpdateUser={handleUpdateUser}
+              onDeleteUser={handleDeleteUser}
+            />
+          )}
+
+          {activeTab === 'help' && <HelpGuide />}
+        </main>
       </div>
-    </div>
-  );
 
-  const renderUserManagement = () => (
-    <UserManagement
-      users={users}
-      currentUser={authState.user!}
-      onAddUser={handleAddUser}
-      onUpdateUser={handleUpdateUser}
-      onDeleteUser={handleDeleteUser}
-    />
-  );
-
-  const renderHelpGuide = () => (
-    <HelpGuide />
-  );
-  const renderContractDetail = () => {
-    if (!selectedContract) return null;
-    const contractComments = comments.filter(c => c.contractId === selectedContract.id);
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Chi tiết hợp đồng</h2>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setShowAdvancedVersionHistory(!showAdvancedVersionHistory)}
-                  className="flex items-center space-x-1 px-3 py-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  <GitBranch className="w-4 h-4" />
-                  <span>Lịch sử phiên bản</span>
-                </button>
-                {selectedContract.status === 'approved' && !selectedContract.finalPdfUrl && (
-                  <button
-                    onClick={() => handleGenerateFinalPDF(selectedContract.id)}
-                    className="flex items-center space-x-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Tạo PDF cuối</span>
-                  </button>
-                )}
+      {/* Contract Detail Modal */}
+      {selectedContract && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">{selectedContract.title}</h2>
                 <button
                   onClick={() => setSelectedContract(null)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <XCircle className="w-6 h-6" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
             </div>
-          </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Basic Info */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Thông tin cơ bản</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Tên hợp đồng</label>
-                      <p className="text-gray-900">{selectedContract.title}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Trạng thái</label>
-                      <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(selectedContract.status)}`}>
-                        {getStatusText(selectedContract.status)}
-                      </span>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Ngày tải lên</label>
-                      <p className="text-gray-900">{new Date(selectedContract.uploadDate).toLocaleDateString('vi-VN')}</p>
-                    </div>
-                    {selectedContract.expiryDate && (
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Contract Info */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-3">Thông tin hợp đồng</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Ngày hết hạn</label>
-                        <p className="text-gray-900">{new Date(selectedContract.expiryDate).toLocaleDateString('vi-VN')}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-4">
-                    <label className="text-sm font-medium text-gray-700">Tags</label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedContract.tags.map(tag => (
-                        <span
-                          key={tag.id}
-                          className={`px-3 py-1 text-sm font-medium rounded-full border ${getTagColor(tag.color)}`}
-                        >
-                          {tag.name}
+                        <span className="text-gray-500">Trạng thái:</span>
+                        <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedContract.status)}`}>
+                          {getStatusText(selectedContract.status)}
                         </span>
-                      ))}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Mức độ:</span>
+                        <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(selectedContract.priority)}`}>
+                          {getPriorityText(selectedContract.priority)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Ngày tải lên:</span>
+                        <span className="ml-2 text-gray-900">{new Date(selectedContract.uploadDate).toLocaleDateString('vi-VN')}</span>
+                      </div>
+                      {selectedContract.contractValue && (
+                        <div>
+                          <span className="text-gray-500">Giá trị:</span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {new Intl.NumberFormat('vi-VN').format(selectedContract.contractValue)} {selectedContract.currency}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                {/* Extracted Info */}
-                {selectedContract.extractedInfo && (
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Thông tin trích xuất</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Loại hợp đồng</label>
-                        <p className="text-gray-900">{selectedContract.extractedInfo.contractType}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Giá trị</label>
-                        <p className="text-gray-900">{selectedContract.extractedInfo.value}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Các bên</label>
-                        <p className="text-gray-900">{selectedContract.extractedInfo.parties.join(', ')}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Thời hạn</label>
-                        <p className="text-gray-900">{selectedContract.extractedInfo.duration}</p>
+                  {/* Extracted Info */}
+                  {selectedContract.extractedInfo && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h3 className="font-medium text-gray-900 mb-3">Thông tin trích xuất</h3>
+                      <div className="space-y-3 text-sm">
+                        <div>
+                          <span className="font-medium text-gray-700">Loại hợp đồng:</span>
+                          <p className="text-gray-900">{selectedContract.extractedInfo.contractType}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700">Các bên tham gia:</span>
+                          <ul className="list-disc list-inside text-gray-900">
+                            {selectedContract.extractedInfo.parties.map((party, index) => (
+                              <li key={index}>{party}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700">Thời hạn:</span>
+                          <p className="text-gray-900">{selectedContract.extractedInfo.duration}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700">Tóm tắt:</span>
+                          <p className="text-gray-900">{selectedContract.extractedInfo.summary}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="mt-4">
-                      <label className="text-sm font-medium text-gray-700">Tóm tắt nội dung</label>
-                      <p className="text-gray-700 mt-2">{selectedContract.extractedInfo.summary}</p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Multi-step Approval */}
-                <MultiStepApproval
-                  steps={selectedContract.approvalSteps}
-                  currentStep={selectedContract.currentStep}
-                  onApprove={(stepId, comments) => handleApprovalStepAction(selectedContract.id, stepId, 'approve', comments)}
-                  onReject={(stepId, reason) => handleApprovalStepAction(selectedContract.id, stepId, 'reject', reason)}
-                  canApprove={authState.user?.permissions.canApprove || false}
-                />
-
-                {/* Comments */}
-                <ContractComments
-                  comments={contractComments}
-                  onAddComment={(content, highlightedText) => handleAddComment(selectedContract.id, content, highlightedText)}
-                  onDeleteComment={handleDeleteComment}
-                  onResolveComment={handleResolveComment}
-                />
-
-                {/* Hierarchy Approval Flow */}
-                <HierarchyApprovalFlow
-                  contract={selectedContract}
-                  users={users}
-                  onUpdateApprovalFlow={handleUpdateApprovalFlow}
-                />
-              </div>
-
-              {/* Sidebar */}
-              <div>
-                <div className="space-y-6">
-                  {/* E-Signature */}
-                  {selectedContract.status === 'approved' && (
-                    <ESignaturePanel
-                      contract={selectedContract}
-                      availableSigners={users}
-                      onSendForSignature={(signers, provider) => handleSendForSignature(selectedContract.id, signers, provider)}
+                  {/* Multi-step Approval */}
+                  {selectedContract.approvalSteps.length > 0 && (
+                    <MultiStepApproval
+                      steps={selectedContract.approvalSteps}
+                      currentStep={selectedContract.currentStep}
+                      onApprove={handleApproveStep}
+                      onReject={handleRejectStep}
+                      canApprove={authState.user?.permissions.canApprove || false}
                     />
                   )}
 
-                  {/* Reminders */}
+                  {/* Hierarchy Approval Flow */}
+                  <HierarchyApprovalFlow
+                    contract={selectedContract}
+                    users={users}
+                    onUpdateApprovalFlow={handleUpdateApprovalFlow}
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  {/* Actions */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-3">Hành động</h3>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowContractEditor(true)}
+                        className="w-full px-4 py-2 text-left text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        Chỉnh sửa hợp đồng
+                      </button>
+                      <button
+                        onClick={() => setShowVersionHistory(true)}
+                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        Xem lịch sử phiên bản
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Contract Comments */}
+                  <ContractComments
+                    comments={[]}
+                    onAddComment={(content, highlightedText) => handleAddComment(selectedContract.id, content, highlightedText)}
+                    onDeleteComment={handleDeleteComment}
+                    onResolveComment={handleResolveComment}
+                  />
+
+                  {/* Contract Reminders */}
                   <ContractReminders
                     contract={selectedContract}
                     onAddReminder={(reminder) => handleAddReminder(selectedContract.id, reminder)}
-                    onDeleteReminder={(reminderId) => handleDeleteReminder(selectedContract.id, reminderId)}
+                    onDeleteReminder={handleDeleteReminder}
+                  />
+
+                  {/* E-Signature Panel */}
+                  <ESignaturePanel
+                    contract={selectedContract}
+                    availableSigners={users}
+                    onSendForSignature={(signers, provider) => handleSendForSignature(selectedContract.id, signers, provider)}
                   />
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  };
+      )}
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
-          <div className="p-6">
-            <div className="flex items-center space-x-2">
-              <FileText className="w-8 h-8 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900">ContractFlow</h1>
-            </div>
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600">
-                    {authState.user?.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{authState.user?.name}</p>
-                  <p className="text-xs text-gray-500">{authState.user?.position}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="mt-2 flex items-center space-x-1 text-xs text-red-600 hover:text-red-800"
-              >
-                <LogOut className="w-3 h-3" />
-                <span>Đăng xuất</span>
-              </button>
-            </div>
-          </div>
-          
-          <nav className="mt-6">
-            <div className="space-y-1">
-              <button
-                onClick={() => setActiveView('dashboard')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                  activeView === 'dashboard' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <div className="w-4 h-4 rounded bg-blue-100"></div>
-                <span>Dashboard</span>
-              </button>
-              
-              {authState.user?.permissions.canUpload && (
-                <button
-                  onClick={() => setActiveView('upload')}
-                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                    activeView === 'upload' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                  }`}
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>Tải lên</span>
-                </button>
-              )}
-              
-              <button
-                onClick={() => setActiveView('contracts')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                  activeView === 'contracts' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                <span>Hợp đồng</span>
-              </button>
-              
-              <button
-                onClick={() => setActiveView('approved')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                  activeView === 'approved' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <CheckCircle className="w-4 h-4" />
-                <span>Đã duyệt</span>
-              </button>
-              
-              {authState.user?.permissions.canViewAnalytics && (
-                <button
-                  onClick={() => setActiveView('analytics')}
-                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                    activeView === 'analytics' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Thống kê</span>
-                </button>
-              )}
-              
-              {authState.user?.permissions.canManageUsers && (
-                <button
-                  onClick={() => setActiveView('user-approval')}
-                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                    activeView === 'user-approval' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                  }`}
-                >
-                  <UserCheck className="w-4 h-4" />
-                  <span>Phê duyệt tài khoản</span>
-                  {getPendingUsers().length > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-auto">
-                      {getPendingUsers().length}
-                    </span>
-                  )}
-                </button>
-              )}
-              
-              {authState.user?.permissions.canManageUsers && (
-                <button
-                  onClick={() => setActiveView('users')}
-                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                    activeView === 'users' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                  }`}
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Quản lý người dùng</span>
-                </button>
-              )}
-              
-              <button
-                onClick={() => setActiveView('help')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 ${
-                  activeView === 'help' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <HelpCircle className="w-4 h-4" />
-                <span>Hướng dẫn</span>
-              </button>
-            </div>
-          </nav>
-        </div>
-        
-        {/* Main content */}
-        <div className="flex-1 p-8">
-          {activeView === 'dashboard' && renderDashboard()}
-          {activeView === 'upload' && authState.user?.permissions.canUpload && renderUpload()}
-          {activeView === 'contracts' && renderContracts()}
-          {activeView === 'approved' && renderContracts()}
-          {activeView === 'analytics' && authState.user?.permissions.canViewAnalytics && (
-            <AdvancedDashboard 
-              stats={dashboardStats} 
-              contracts={contracts}
-              onBack={() => setActiveView('dashboard')}
-              onContractClick={(contract) => setSelectedContract(contract)}
-            />
-          )}
-          {activeView === 'user-approval' && authState.user?.permissions.canManageUsers && renderUserApproval()}
-          {activeView === 'users' && authState.user?.permissions.canManageUsers && renderUserManagement()}
-          {activeView === 'help' && renderHelpGuide()}
-        </div>
-      </div>
-      
-      {selectedContract && renderContractDetail()}
-      
+      {/* Contract Editor Modal */}
+      {showContractEditor && selectedContract && (
+        <ContractEditor
+          contract={selectedContract}
+          availableTags={mockTags}
+          onSave={handleContractSave}
+          onClose={() => setShowContractEditor(false)}
+          canEdit={true}
+        />
+      )}
+
+      {/* Version History Modal */}
+      {showVersionHistory && selectedContract && (
+        <AdvancedVersionHistory
+          contract={selectedContract}
+          onVersionSelect={handleVersionSelect}
+          onCompareVersions={handleCompareVersions}
+          onRestoreVersion={(versionId) => console.log('Restore version:', versionId)}
+        />
+      )}
+
+      {/* Version Comparison Modal */}
+      {showVersionComparison && comparisonVersions && (
+        <VersionComparison
+          version1={comparisonVersions.v1}
+          version2={comparisonVersions.v2}
+          onClose={() => setShowVersionComparison(false)}
+        />
+      )}
+
+      {/* Manual Contract Creator */}
       {showManualCreator && (
         <ManualContractCreator
-          availableTags={availableTags}
+          availableTags={mockTags}
           onSave={handleManualContractSave}
           onClose={() => setShowManualCreator(false)}
         />
       )}
-      
-      {editingContract && (
-        <ContractEditor
-          contract={editingContract}
-          availableTags={availableTags}
-          onSave={handleSaveContract}
-          onClose={() => setEditingContract(null)}
-          canEdit={canEditContract(editingContract)}
-        />
-      )}
-      
-      {showAdvancedVersionHistory && selectedContract && (
+
+      {/* Upload Modal Placeholder */}
+      {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Lịch sử phiên bản nâng cao - {selectedContract.title}</h2>
-                <button
-                  onClick={() => setShowAdvancedVersionHistory(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XCircle className="w-6 h-6" />
-                </button>
-              </div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Tải lên hợp đồng</h3>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            <div className="p-6">
-              <AdvancedVersionHistory
-                contract={selectedContract}
-                onVersionSelect={(version) => console.log('Selected version:', version)}
-                onCompareVersions={(v1, v2) => setShowVersionComparison({ v1, v2 })}
-                onRestoreVersion={(versionId) => handleRestoreVersion(selectedContract.id, versionId)}
-              />
+            <div className="text-center py-8">
+              <Upload className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Tính năng tải lên sẽ được triển khai sau</p>
             </div>
+            <button
+              onClick={() => setShowUploadModal(false)}
+              className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Đóng
+            </button>
           </div>
         </div>
-      )}
-      
-      {showVersionHistory && selectedContract && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Lịch sử phiên bản - {selectedContract.title}</h2>
-                <button
-                  onClick={() => setShowVersionHistory(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XCircle className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <VersionHistory
-                contract={selectedContract}
-                onVersionSelect={(version) => console.log('Selected version:', version)}
-                onCompareVersions={(v1, v2) => setShowVersionComparison({ v1, v2 })}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {showVersionComparison && (
-        <VersionComparison
-          version1={showVersionComparison.v1}
-          version2={showVersionComparison.v2}
-          onClose={() => setShowVersionComparison(null)}
-        />
       )}
     </div>
   );
