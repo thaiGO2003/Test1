@@ -111,7 +111,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats, onM
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Hợp đồng tải lên theo tháng
-            <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào cột để xem chi tiết)</span>
+            <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào cột để xem chi tiết)</div>
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyData}>
@@ -135,7 +135,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats, onM
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Phân bố trạng thái
-            <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào phần để xem chi tiết)</span>
+            <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào phần để xem chi tiết)</div>
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -165,7 +165,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats, onM
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Lý do từ chối phổ biến
-          <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào cột để xem hợp đồng)</span>
+          <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào cột để xem hợp đồng)</div>
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart 
