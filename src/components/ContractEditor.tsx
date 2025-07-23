@@ -17,6 +17,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   onClose,
   canEdit
 }) => {
+  const [changeReason, setChangeReason] = useState('');
+  const [changeDescription, setChangeDescription] = useState('');
   const [editedContract, setEditedContract] = useState({
     title: contract.title,
     description: contract.description,
@@ -34,7 +36,16 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   const [newParty, setNewParty] = useState('');
 
   const handleSave = () => {
-    onSave(contract.id, editedContract);
+    if (!changeReason.trim()) {
+      alert('Vui lòng nhập lý do thay đổi');
+      return;
+    }
+    
+    onSave(contract.id, {
+      ...editedContract,
+      changeReason,
+      changeDescription: changeDescription || changeReason
+    });
     onClose();
   };
 
@@ -308,6 +319,33 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
         </div>
 
         <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="mb-4 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lý do thay đổi *
+              </label>
+              <input
+                type="text"
+                required
+                value={changeReason}
+                onChange={(e) => setChangeReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="VD: Cập nhật thông tin theo yêu cầu khách hàng"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Mô tả chi tiết (tùy chọn)
+              </label>
+              <textarea
+                value={changeDescription}
+                onChange={(e) => setChangeDescription(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Mô tả chi tiết những thay đổi đã thực hiện..."
+              />
+            </div>
+          </div>
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}

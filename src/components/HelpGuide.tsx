@@ -61,6 +61,55 @@ export const HelpGuide: React.FC = () => {
     },
     {
       id: 'legal',
+      name: 'Giám đốc (Director)',
+      icon: <Shield className="w-6 h-6 text-purple-500" />,
+      color: 'purple',
+      description: 'Giám đốc phê duyệt hợp đồng giá trị cao',
+      permissions: [
+        'Phê duyệt hợp đồng giá trị cao (≤200M VND)',
+        'Ký hợp đồng điện tử',
+        'Tải lên hợp đồng mới',
+        'Tạo hợp đồng thủ công',
+        'Xem tất cả thống kê và báo cáo',
+        'Chỉnh sửa hợp đồng nháp và bị từ chối',
+        'Quyết định cuối cho hợp đồng trung bình'
+      ],
+      workflow: [
+        'Nhận hợp đồng từ Manager/Legal/Finance',
+        'Đánh giá tác động chiến lược của hợp đồng',
+        'Xem xét khả năng tài chính và rủi ro',
+        'Phê duyệt hoặc chuyển lên CEO nếu vượt ngưỡng',
+        'Theo dõi hiệu quả thực hiện hợp đồng',
+        'Tham gia ký điện tử cho hợp đồng quan trọng'
+      ]
+    },
+    {
+      id: 'ceo',
+      name: 'Tổng giám đốc (CEO)',
+      icon: <Shield className="w-6 h-6 text-red-500" />,
+      color: 'red',
+      description: 'Quyết định cuối cùng cho mọi hợp đồng',
+      permissions: [
+        'Phê duyệt mọi hợp đồng (>200M VND)',
+        'Ký hợp đồng điện tử',
+        'Tải lên hợp đồng mới',
+        'Tạo hợp đồng thủ công',
+        'Xem tất cả thống kê và báo cáo',
+        'Quản lý người dùng cấp cao',
+        'Phê duyệt tài khoản quản lý',
+        'Quyết định chiến lược hợp đồng'
+      ],
+      workflow: [
+        'Nhận hợp đồng giá trị rất cao từ Director',
+        'Đánh giá tác động toàn diện đến công ty',
+        'Xem xét khả năng tài chính và chiến lược dài hạn',
+        'Đưa ra quyết định cuối cùng',
+        'Ký điện tử cho các hợp đồng quan trọng',
+        'Giám sát tổng thể hiệu quả hợp đồng'
+      ]
+    },
+    {
+      id: 'finance',
       name: 'Pháp chế (Legal)',
       icon: <FileText className="w-6 h-6 text-purple-500" />,
       color: 'purple',
@@ -84,7 +133,7 @@ export const HelpGuide: React.FC = () => {
       ]
     },
     {
-      id: 'finance',
+      id: 'legal',
       name: 'Tài chính (Finance)',
       icon: <User className="w-6 h-6 text-indigo-500" />,
       color: 'indigo',
@@ -103,7 +152,7 @@ export const HelpGuide: React.FC = () => {
         'Đánh giá giá trị hợp đồng và ngân sách',
         'Xác minh khả năng thanh toán',
         'Phê duyệt sau khi Pháp chế đã duyệt',
-        'Chuyển lên CEO nếu vượt ngưỡng',
+        'Chuyển lên Director/CEO nếu vượt ngưỡng',
         'Tham gia vào luồng ký điện tử'
       ]
     },
@@ -212,9 +261,10 @@ export const HelpGuide: React.FC = () => {
         { step: 5, title: 'Duyệt cấp 1', description: 'Quản lý phòng ban phê duyệt', actor: 'Manager' },
         { step: 6, title: 'Duyệt pháp lý', description: 'Pháp chế kiểm tra và phê duyệt', actor: 'Legal' },
         { step: 7, title: 'Duyệt tài chính', description: 'Tài chính đánh giá và phê duyệt', actor: 'Finance' },
-        { step: 8, title: 'Duyệt cuối', description: 'CEO phê duyệt cuối (nếu cần)', actor: 'CEO' },
-        { step: 9, title: 'Ký điện tử', description: 'Thiết lập và thực hiện ký điện tử', actor: 'All parties' },
-        { step: 10, title: 'Lưu trữ', description: 'Lưu trữ hợp đồng đã hoàn thành', actor: 'System' }
+        { step: 8, title: 'Duyệt giám đốc', description: 'Giám đốc phê duyệt (50M-200M VND)', actor: 'Director' },
+        { step: 9, title: 'Duyệt CEO', description: 'CEO phê duyệt cuối (>200M VND)', actor: 'CEO' },
+        { step: 10, title: 'Ký điện tử', description: 'Thiết lập và thực hiện ký điện tử', actor: 'All parties' },
+        { step: 11, title: 'Lưu trữ', description: 'Lưu trữ hợp đồng đã hoàn thành', actor: 'System' }
       ]
     },
     {
@@ -423,7 +473,7 @@ export const HelpGuide: React.FC = () => {
             
             <div className="border-l-4 border-indigo-500 pl-4">
               <h4 className="font-medium text-gray-900 mb-2">Luồng phê duyệt hoạt động như thế nào?</h4>
-              <p className="text-gray-600">Hợp đồng sẽ đi qua các bước: Quản lý phòng ban → Pháp chế → Tài chính → CEO (nếu lơn hơn 500M VND). Mỗi bước có thể phê duyệt hoặc từ chối.</p>
+              <p className="text-gray-600">Hợp đồng sẽ đi qua các bước: Quản lý phòng ban → Pháp chế → Tài chính → Giám đốc (>50M VND) → CEO (>200M VND). Mỗi bước có thể phê duyệt hoặc từ chối.</p>
             </div>
             
             <div className="border-l-4 border-green-500 pl-4">

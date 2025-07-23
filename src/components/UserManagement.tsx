@@ -42,8 +42,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     switch (role) {
       case 'employee': return 'Nhân viên';
       case 'manager': return 'Quản lý';
+      case 'director': return 'Giám đốc';
+      case 'ceo': return 'Tổng giám đốc';
       case 'admin': return 'Quản trị viên';
       case 'legal': return 'Pháp chế';
+      case 'finance': return 'Tài chính';
       default: return role;
     }
   };
@@ -52,8 +55,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     switch (role) {
       case 'employee': return 'bg-blue-100 text-blue-800';
       case 'manager': return 'bg-green-100 text-green-800';
+      case 'director': return 'bg-purple-100 text-purple-800';
+      case 'ceo': return 'bg-red-100 text-red-800';
       case 'admin': return 'bg-red-100 text-red-800';
       case 'legal': return 'bg-purple-100 text-purple-800';
+      case 'finance': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -134,8 +140,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           <option value="all">Tất cả vai trò</option>
           <option value="employee">Nhân viên</option>
           <option value="manager">Quản lý</option>
+          <option value="director">Giám đốc</option>
+          <option value="ceo">Tổng giám đốc</option>
           <option value="admin">Quản trị viên</option>
           <option value="legal">Pháp chế</option>
+          <option value="finance">Tài chính</option>
         </select>
         <select
           value={filterDepartment}
@@ -183,8 +192,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               >
                 <option value="employee">Nhân viên</option>
                 <option value="manager">Quản lý</option>
+                <option value="director">Giám đốc</option>
+                <option value="ceo">Tổng giám đốc</option>
                 <option value="admin">Quản trị viên</option>
                 <option value="legal">Pháp chế</option>
+                <option value="finance">Tài chính</option>
               </select>
             </div>
             <div>
@@ -428,8 +440,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   >
                     <option value="employee">Nhân viên</option>
                     <option value="manager">Quản lý</option>
+                    <option value="director">Giám đốc</option>
+                    <option value="ceo">Tổng giám đốc</option>
                     <option value="admin">Quản trị viên</option>
                     <option value="legal">Pháp chế</option>
+                    <option value="finance">Tài chính</option>
                   </select>
                 </div>
                 <div>

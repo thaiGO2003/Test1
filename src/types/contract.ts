@@ -7,11 +7,15 @@ export interface ContractVersion {
   changeType: 'created' | 'edited' | 'approved' | 'rejected' | 'signed';
   changedFields?: string[];
   previousVersion?: string;
+  parentVersionId?: string;
+  isMinorEdit?: boolean;
   createdAt: string;
   createdBy: string;
   createdByRole: string;
   fileSize?: number;
   checksum?: string;
+  changeDescription?: string;
+  changeReason?: string;
 }
 
 export interface ContractComment {

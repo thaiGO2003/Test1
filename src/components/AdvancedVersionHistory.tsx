@@ -137,6 +137,18 @@ export const AdvancedVersionHistory: React.FC<AdvancedVersionHistoryProps> = ({
                         <strong>Thay đổi:</strong> {version.changes}
                       </p>
                     )}
+                    
+                    {version.changeDescription && (
+                      <p className="text-sm text-gray-500 mb-2">
+                        <strong>Mô tả:</strong> {version.changeDescription}
+                      </p>
+                    )}
+                    
+                    {version.changeReason && (
+                      <p className="text-sm text-gray-500 mb-2">
+                        <strong>Lý do:</strong> {version.changeReason}
+                      </p>
+                    )}
 
                     {version.changedFields && version.changedFields.length > 0 && (
                       <div className="mb-2">
@@ -223,6 +235,16 @@ export const AdvancedVersionHistory: React.FC<AdvancedVersionHistoryProps> = ({
                       <div>
                         <strong>Checksum:</strong> 
                         <code className="ml-1 text-xs bg-gray-200 px-1 rounded">{version.checksum}</code>
+                      </div>
+                    )}
+                    {version.changeReason && (
+                      <div className="md:col-span-2">
+                        <strong>Lý do thay đổi:</strong> {version.changeReason}
+                      </div>
+                    )}
+                    {version.changeDescription && (
+                      <div className="md:col-span-2">
+                        <strong>Mô tả chi tiết:</strong> {version.changeDescription}
                       </div>
                     )}
                   </div>

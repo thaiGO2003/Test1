@@ -90,6 +90,50 @@ function App() {
     },
     {
       id: '3',
+      email: 'director@company.com',
+      name: 'Trần Văn Director',
+      role: 'director',
+      department: 'Operations',
+      position: 'Operations Director',
+      isActive: true,
+      isApproved: true,
+      hierarchyLevel: 3,
+      maxContractValue: 500000000,
+      createdAt: '2024-01-01T00:00:00Z',
+      permissions: {
+        canUpload: true,
+        canApprove: true,
+        canManageUsers: false,
+        canViewAnalytics: true,
+        canSign: true,
+        canApproveUsers: false,
+        canCreateManual: true
+      }
+    },
+    {
+      id: '4',
+      email: 'ceo@company.com',
+      name: 'Lê Thị CEO',
+      role: 'ceo',
+      department: 'Executive',
+      position: 'Chief Executive Officer',
+      isActive: true,
+      isApproved: true,
+      hierarchyLevel: 4,
+      maxContractValue: Infinity,
+      createdAt: '2024-01-01T00:00:00Z',
+      permissions: {
+        canUpload: true,
+        canApprove: true,
+        canManageUsers: true,
+        canViewAnalytics: true,
+        canSign: true,
+        canApproveUsers: true,
+        canCreateManual: true
+      }
+    },
+    {
+      id: '5',
       email: 'legal@company.com',
       name: 'Trần Thị Legal',
       role: 'legal',
@@ -110,7 +154,7 @@ function App() {
       }
     },
     {
-      id: '4',
+      id: '6',
       email: 'finance@company.com',
       name: 'Lê Văn Finance',
       role: 'finance',
@@ -132,7 +176,7 @@ function App() {
       }
     },
     {
-      id: '5',
+      id: '7',
       email: 'employee@company.com',
       name: 'Phạm Thị Employee',
       role: 'employee',
@@ -142,6 +186,27 @@ function App() {
       isApproved: true,
       hierarchyLevel: 1,
       createdAt: '2024-01-01T00:00:00Z',
+      permissions: {
+        canUpload: true,
+        canApprove: false,
+        canManageUsers: false,
+        canViewAnalytics: false,
+        canSign: false,
+        canApproveUsers: false,
+        canCreateManual: false
+      }
+    },
+    {
+      id: '8',
+      email: 'pending@company.com',
+      name: 'Nguyễn Văn Pending',
+      role: 'employee',
+      department: 'Marketing',
+      position: 'Marketing Specialist',
+      isActive: false,
+      isApproved: false,
+      hierarchyLevel: 1,
+      createdAt: '2024-01-20T00:00:00Z',
       permissions: {
         canUpload: true,
         canApprove: false,
@@ -232,13 +297,19 @@ function App() {
 
   const handleLogin = (credentials: LoginCredentials) => {
     const user = mockUsers.find(u => u.email === credentials.email);
-    if (user) {
+    if (user && user.isApproved && user.isActive) {
       setAuthState({
         isAuthenticated: true,
         user,
         token: 'mock-token'
       });
       setShowAuthModal(false);
+    } else if (user && !user.isApproved) {
+      alert('Tài khoản của bạn chưa được phê duyệt. Vui lòng liên hệ quản trị viên.');
+    } else if (user && !user.isActive) {
+      alert('Tài khoản của bạn đã bị tạm khóa. Vui lòng liên hệ quản trị viên.');
+    } else {
+      alert('Email hoặc mật khẩu không đúng.');
     }
   };
 
@@ -275,8 +346,38 @@ function App() {
   };
 
   const handleContractSave = (contractId: string, updates: Partial<Contract>) => {
+    const contract = contracts.find(c => c.id === contractId);
+    if (!contract) return;
+
+    // Tạo phiên bản mới khi chỉnh sửa
+    const newVersion: ContractVersion = {
+      id: `v${contract.versions.length + 1}`,
+      version: contract.versions.length + 1,
+      title: `Phiên bản ${contract.versions.length + 1} - Chỉnh sửa`,
+      content: updates.extractedInfo?.fullText || contract.extractedInfo?.fullText || '',
+      changes: 'Chỉnh sửa thông tin hợp đồng',
+      changeType: 'edited',
+      parentVersionId: contract.versions[contract.versions.length - 1]?.id,
+      isMinorEdit: true,
+      createdAt: new Date().toISOString(),
+      createdBy: authState.user?.name || 'Unknown',
+      createdByRole: authState.user?.role || 'unknown',
+      changeDescription: 'Cập nhật thông tin hợp đồng',
+      changeReason: 'Chỉnh sửa theo yêu cầu'
+    };
+
+    const updatedVersions = [...contract.versions, newVersion];
+    const updatedContract = {
+      ...contract,
+      ...updates,
+      versions: updatedVersions,
+      currentVersion: newVersion.version,
+      lastModifiedBy: authState.user?.name,
+      lastModifiedAt: new Date().toISOString()
+    };
+
     setContracts(contracts.map(c => 
-      c.id === contractId ? { ...c, ...updates } : c
+      c.id === contractId ? updatedContract : c
     ));
     setShowContractEditor(false);
   };
@@ -373,6 +474,8 @@ function App() {
           createdAt: new Date().toISOString(),
           createdBy: authState.user?.name || 'Unknown',
           createdByRole: authState.user?.role || 'unknown'
+          changeDescription: 'Tạo hợp đồng mới bằng tay',
+          changeReason: 'Khởi tạo hợp đồng'
         }
       ],
       currentVersion: 1,
@@ -384,6 +487,7 @@ function App() {
     } as Contract;
 
     setContracts([newContract, ...contracts]);
+    setShowManualCreator(false);
   };
 
   const getDashboardStats = (): DashboardStats => {

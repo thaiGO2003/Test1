@@ -81,6 +81,11 @@ export const DetailedAnalytics: React.FC<DetailedAnalyticsProps> = ({
                           <span>Duyệt bởi: {contract.reviewer}</span>
                         </div>
                       )}
+                      {contract.rejectionReason && (
+                        <div className="text-sm text-red-600 mt-1">
+                          <strong>Lý do:</strong> {contract.rejectionReason}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="ml-4">

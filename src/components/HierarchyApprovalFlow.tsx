@@ -21,30 +21,41 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
     
     // Định nghĩa ngưỡng phê duyệt theo giá trị hợp đồng
     const approvalThresholds = [
-      { level: 2, role: 'manager', maxValue: 100000000, title: 'Quản lý' }, // 100M VND
-      { level: 3, role: 'director', maxValue: 500000000, title: 'Giám đốc' }, // 500M VND
+      { level: 2, role: 'manager', maxValue: 50000000, title: 'Quản lý' }, // 50M VND
+      { level: 3, role: 'director', maxValue: 200000000, title: 'Giám đốc' }, // 200M VND
       { level: 4, role: 'ceo', maxValue: Infinity, title: 'Tổng giám đốc' }
     ];
 
-    const requiredLevels = approvalThresholds.filter(threshold => value > (threshold.maxValue / 5));
+    const requiredLevels = [];
+    
+    // Xác định cấp độ phê duyệt cần thiết dựa trên giá trị
+    if (value > 10000000) { // > 10M VND cần Manager
+      requiredLevels.push(approvalThresholds[0]);
+    }
+    if (value > 50000000) { // > 50M VND cần Director
+      requiredLevels.push(approvalThresholds[1]);
+    }
+    if (value > 200000000) { // > 200M VND cần CEO
+      requiredLevels.push(approvalThresholds[2]);
+    }
     
     // Luôn cần pháp chế cho hợp đồng quan trọng
-    const needsLegal = value > 50000000 || contract.priority === 'high' || contract.priority === 'urgent';
+    const needsLegal = value > 20000000 || contract.priority === 'high' || contract.priority === 'urgent';
     
     // Luôn cần tài chính cho hợp đồng có giá trị
-    const needsFinance = value > 50000000 || contract.priority === 'high' || contract.priority === 'urgent';
+    const needsFinance = value > 30000000 || contract.priority === 'high' || contract.priority === 'urgent';
     
     const steps: ApprovalStep[] = [];
     let stepNumber = 1;
 
     // Bước 1: Quản lý trực tiếp (nếu cần)
-    if (requiredLevels.some(l => l.level >= 2)) {
+    if (value > 10000000) {
       steps.push({
         id: `step-${stepNumber}`,
         stepNumber: stepNumber++,
         approverRole: 'Quản lý phòng ban',
         requiredHierarchyLevel: 2,
-        contractValueThreshold: 100000000,
+        contractValueThreshold: 50000000,
         status: 'pending'
       });
     }
@@ -71,20 +82,20 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
       });
     }
 
-    // Bước 4: Giám đốc (nếu cần)
-    if (requiredLevels.some(l => l.level >= 3)) {
+    // Bước 4: Giám đốc (nếu cần) 
+    if (value > 50000000) {
       steps.push({
         id: `step-${stepNumber}`,
         stepNumber: stepNumber++,
         approverRole: 'Giám đốc',
         requiredHierarchyLevel: 3,
-        contractValueThreshold: 500000000,
+        contractValueThreshold: 200000000,
         status: 'pending'
       });
     }
 
     // Bước 5: Tổng giám đốc (nếu cần)
-    if (requiredLevels.some(l => l.level >= 4)) {
+    if (value > 200000000) {
       steps.push({
         id: `step-${stepNumber}`,
         stepNumber: stepNumber++,
@@ -175,21 +186,21 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
                 <Shield className="w-4 h-4 text-green-600" />
                 <span className="text-green-800">Quản lý phòng ban</span>
               </div>
-              <span className="text-green-700 text-sm">≤ 100.000.000 VND</span>
+              <span className="text-green-700 text-sm">≤ 50.000.000 VND</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded">
               <div className="flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-amber-600" />
                 <span className="text-amber-800">Giám đốc</span>
               </div>
-              <span className="text-amber-700 text-sm">≤ 500.000.000 VND</span>
+              <span className="text-amber-700 text-sm">≤ 200.000.000 VND</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded">
               <div className="flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-red-600" />
                 <span className="text-red-800">Tổng giám đốc</span>
               </div>
-              <span className="text-red-700 text-sm"> 500.000.000 VND</span>
+              <span className="text-red-700 text-sm">> 200.000.000 VND</span>
             </div>
           </div>
         </div>

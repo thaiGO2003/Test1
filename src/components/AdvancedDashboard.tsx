@@ -9,9 +9,11 @@ interface AdvancedDashboardProps {
   onChartClick: (data: any, type: string) => void;
 }
 
-export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) => {
+export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ 
+  stats, 
   onMetricClick,
-  onChartClick
+  onChartClick 
+}) => {
   const monthlyData = stats.monthlyUploads.map((count, index) => ({
     month: `Tháng ${index + 1}`,
     uploads: count,
@@ -118,7 +120,6 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
               <Line 
@@ -127,7 +128,8 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
                 stroke="#3B82F6" 
                 strokeWidth={2}
                 onClick={(data) => onChartClick(data, 'monthly')}
-                style={{ cursor: 'pointer' }}
+                onClick={(data) => onChartClick(data, 'rejection')}
+                cursor="pointer"
               />
             </LineChart>
           </ResponsiveContainer>
