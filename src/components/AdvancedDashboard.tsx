@@ -2,18 +2,14 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { DashboardStats } from '../types/contract';
-import { TimeBasedAnalytics } from './TimeBasedAnalytics';
-import { Contract } from '../types/contract';
 
 interface AdvancedDashboardProps {
   stats: DashboardStats;
-  contracts: Contract[];
   onMetricClick: (metric: string) => void;
   onChartClick: (data: any, type: string) => void;
-  onContractClick: (contract: Contract) => void;
 }
 
-export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) => {
+export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats, onMetricClick, onChartClick }) => {
   const monthlyData = stats.monthlyUploads.map((count, index) => ({
     month: `Tháng ${index + 1}`,
     uploads: count,
@@ -115,7 +111,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Hợp đồng tải lên theo tháng
-            <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào cột để xem chi tiết)</div>
+            <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào cột để xem chi tiết)</span>
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyData}>
@@ -139,7 +135,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Phân bố trạng thái
-            <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào phần để xem chi tiết)</div>
+            <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào phần để xem chi tiết)</span>
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -169,7 +165,7 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Lý do từ chối phổ biến
-          <div className="text-sm font-normal text-gray-500 mt-1">(Nhấp vào cột để xem hợp đồng)</div>
+          <span className="text-sm font-normal text-gray-500 ml-2">(Nhấp vào cột để xem hợp đồng)</span>
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart 
@@ -188,10 +184,6 @@ export const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ stats }) =
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <TimeBasedAnalytics
-        contracts={contracts}
-        onContractClick={onContractClick}
-      />
     </div>
   );
 };
