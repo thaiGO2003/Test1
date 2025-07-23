@@ -178,12 +178,12 @@ export const TimeBasedAnalytics: React.FC<TimeBasedAnalyticsProps> = ({
   return (
     <div className="space-y-6">
       {/* Time Range Selector */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div className="flex items-center space-x-2">
           <Calendar className="w-5 h-5 text-blue-600" />
           <h2 className="text-xl font-semibold text-gray-900">Thống kê theo thời gian</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">
           <div className="flex items-center space-x-2">
             <CalendarDays className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Nhóm theo:</span>
@@ -209,23 +209,23 @@ export const TimeBasedAnalytics: React.FC<TimeBasedAnalyticsProps> = ({
             <option value="1y">1 năm qua</option>
           </select>
           {timeRange === 'custom' && (
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
               <span className="text-gray-500">đến</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
           )}
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             <Download className="w-4 h-4" />
             <span>Xuất báo cáo</span>
           </button>

@@ -249,7 +249,7 @@ export const HelpGuide: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <button
           onClick={() => toggleSection('roles')}
-          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50"
+          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center space-x-3">
             <Users className="w-6 h-6 text-blue-600" />
@@ -307,7 +307,7 @@ export const HelpGuide: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <button
           onClick={() => toggleSection('features')}
-          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50"
+          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center space-x-3">
             <Settings className="w-6 h-6 text-blue-600" />
@@ -353,7 +353,7 @@ export const HelpGuide: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <button
           onClick={() => toggleSection('workflows')}
-          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50"
+          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center space-x-3">
             <BarChart3 className="w-6 h-6 text-blue-600" />
@@ -400,7 +400,7 @@ export const HelpGuide: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <button
           onClick={() => toggleSection('faq')}
-          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50"
+          className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center space-x-3">
             <HelpCircle className="w-6 h-6 text-blue-600" />

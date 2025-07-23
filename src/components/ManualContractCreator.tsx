@@ -174,7 +174,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
         <div className="p-6 space-y-8">
           {/* 1. Thông tin chung */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">📝 1. Thông tin chung</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">📝 1. Thông tin chung</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -272,7 +272,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 2. Mục đích hợp đồng */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">💼 2. Mục đích hợp đồng</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">💼 2. Mục đích hợp đồng</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Loại hợp đồng</label>
@@ -318,7 +318,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 3. Giá trị hợp đồng và thanh toán */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">💰 3. Giá trị hợp đồng và thanh toán</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">💰 3. Giá trị hợp đồng và thanh toán</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Tổng giá trị</label>
@@ -386,7 +386,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 4. Thời gian và tiến độ */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">⏱️ 4. Thời gian và tiến độ</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">⏱️ 4. Thời gian và tiến độ</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Thời hạn hợp đồng</label>
@@ -418,7 +418,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 5. Điều khoản quan trọng */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">🛡️ 5. Điều khoản quan trọng</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">🛡️ 5. Điều khoản quan trọng</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Bảo hành</label>
@@ -462,7 +462,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 6. Phụ lục và tài liệu */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">📎 6. Phụ lục và tài liệu đính kèm</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">📎 6. Phụ lục và tài liệu đính kèm</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Danh sách phụ lục</label>
               <div className="space-y-2">
@@ -496,7 +496,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* 7. Tóm tắt và ghi chú */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">📝 7. Tóm tắt và ghi chú</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">📝 7. Tóm tắt và ghi chú</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả tổng quan</label>
               <textarea
@@ -535,7 +535,7 @@ export const ManualContractCreator: React.FC<ManualContractCreatorProps> = ({
 
           {/* Tags */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">🏷️ Tags</h3>
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">🏷️ Tags</h3>
             <div>
               <div className="flex flex-wrap gap-2 mb-3">
                 {contractData.tags.map(tag => (

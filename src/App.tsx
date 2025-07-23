@@ -745,17 +745,13 @@ function App() {
                   onContractClick={setSelectedContract}
                 />
               ) : (
-                <div className="space-y-6">
-                  <AdvancedDashboard
-                    stats={getDashboardStats()}
-                    onMetricClick={(metric) => setShowDetailedAnalytics(true)}
-                    onChartClick={(data, type) => setShowDetailedAnalytics(true)}
-                  />
-                  <TimeBasedAnalytics
-                    contracts={contracts}
-                    onContractClick={setSelectedContract}
-                  />
-                </div>
+                <AdvancedDashboard
+                  stats={getDashboardStats()}
+                  contracts={contracts}
+                  onMetricClick={(metric) => setShowDetailedAnalytics(true)}
+                  onChartClick={(data, type) => setShowDetailedAnalytics(true)}
+                  onContractClick={setSelectedContract}
+                />
               )}
             </div>
           )}
