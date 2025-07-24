@@ -473,7 +473,7 @@ function App() {
           changeType: 'created',
           createdAt: new Date().toISOString(),
           createdBy: authState.user?.name || 'Unknown',
-          createdByRole: authState.user?.role || 'unknown'
+          createdByRole: authState.user?.role || 'unknown',
           changeDescription: 'Tạo hợp đồng mới bằng tay',
           changeReason: 'Khởi tạo hợp đồng'
         }
