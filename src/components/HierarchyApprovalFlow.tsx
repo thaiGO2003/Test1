@@ -200,7 +200,7 @@ export const HierarchyApprovalFlow: React.FC<HierarchyApprovalFlowProps> = ({
                 <Shield className="w-4 h-4 text-red-600" />
                 <span className="text-red-800">Tổng giám đốc</span>
               </div>
-              <span className="text-red-700 text-sm">> 200.000.000 VND</span>
+              <span className="text-red-700 text-sm">Lớn hơn 200.000.000 VND</span>
             </div>
           </div>
         </div>
